@@ -23,8 +23,8 @@ import java.util.logging.Logger;
 
 import org.apache.commons.io.FileUtils;
 
-import de.vibee.releaselister.model.MP3Release;
-import de.vibee.releaselister.model.Mp3WithChecksum;
+import de.vibee.releaselister.model.Release;
+import de.vibee.releaselister.model.AudioFileWithChecksum;
 import de.vibee.releaselister.view.ActionFrame;
 import de.vibee.releaselister.view.ReleaseLister;
 
@@ -41,12 +41,12 @@ public class CRCChecker extends InterruptableRunnable{
     int counter = 0;
     int countValid = 0;
     int countInvalid = 0;
-    List<MP3Release> toCheck;
+    List<Release> toCheck;
     long time = 0;
     long timeGone = 0;
     long size = 0;
     
-    public CRCChecker(List<MP3Release> toCheck){
+    public CRCChecker(List<Release> toCheck){
         this.toCheck = toCheck;
     }
     
@@ -54,7 +54,7 @@ public class CRCChecker extends InterruptableRunnable{
      * Verifies an MP3 Release
      * @param release Release to verify
      */
-    public void checkSfv(MP3Release release){
+    public void checkSfv(Release release){
         if (Thread.currentThread().isInterrupted()) {
             return;
         }
@@ -64,17 +64,17 @@ public class CRCChecker extends InterruptableRunnable{
         }
         
         boolean isValid = true;
-        for (Mp3WithChecksum m : release.getMp3s()){
-            if (!m.getMp3Exists()){
+        for (AudioFileWithChecksum m : release.getAudioFiles()){
+            if (!m.getAudioFileExists()){
                 isValid = false;
             }
             else{
                 try {
-                    if (m.getChecksum() == FileUtils.checksumCRC32(m.getMp3())){
-                        m.setMp3IsValid(true);
+                    if (m.getChecksum() == FileUtils.checksumCRC32(m.getAudioFile())){
+                        m.setAudioFileIsValid(true);
                     }
                     else{
-                        m.setMp3IsValid(false);
+                        m.setAudioFileIsValid(false);
                         isValid = false;
                     }
 
@@ -101,7 +101,7 @@ public class CRCChecker extends InterruptableRunnable{
         actionFrame.setVisible(true);
         time = System.currentTimeMillis() - 1;
         
-        for (MP3Release release : toCheck){
+        for (Release release : toCheck){
             timeGone = System.currentTimeMillis() - time;
             actionFrame.setStatusLabelText("Veryfied " + counter + " of " + 
                     toCheck.size() + " Releases (" + (long)(size / timeGone) / 1024 + " MB/s)");
@@ -115,7 +115,7 @@ public class CRCChecker extends InterruptableRunnable{
             size += release.getSize();
             counter++;
             actionFrame.getProgressBar().setValue(counter);
-            if (release.getReleaseIsValid()){
+            if (release.isValid()){
                 countValid++;
             }
             else {

@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
 
-import de.vibee.releaselister.model.MP3Release;
+import de.vibee.releaselister.model.Release;
 import de.vibee.releaselister.model.PathHolder;
 import de.vibee.releaselister.model.ReleaseHolder;
 import de.vibee.releaselister.model.ReleasePath;
@@ -45,7 +45,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     
     private int counter;
     private boolean readTagOption;
-    private List<MP3Release> scannedList;
+    private List<Release> scannedList;
     private ActionFrame actionFrame;
     
     public Scanner(boolean readTagOption){
@@ -73,7 +73,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
                     
                     if (f.isDirectory()){
                         
-                        if (Pattern.matches(".+-.+-[0-9][0-9]..-.+", f.getName()) && !f.getName().contains("-FLAC-")){ 
+                        if (Pattern.matches(".+-.+-[0-9][0-9]..-.+", f.getName())){ 
                             File sfv = null;
                             File nfo = null;
                             
@@ -90,7 +90,13 @@ public class Scanner extends InterruptableRunnable implements Runnable {
                             }
                             
                             if (sfv != null){
-                                scannedList.add(new MP3Release(f,sfv,nfo, readTagOption));
+                            	if (f.getName().contains("-FLAC")){
+                            		scannedList.add(new Release(f,sfv,nfo, readTagOption, Release.FLAC));
+                            	}
+                            	else{
+                            		scannedList.add(new Release(f,sfv,nfo, readTagOption, Release.MP3));
+                            	}
+                                
                                 counter++;
                                 actionFrame.setStatusLabelText("Found " +  counter + " Releases");
                             }
@@ -158,7 +164,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
                         scanForReleases(aktPath.getPath());
                     }
                     else{
-                        for (MP3Release m : ReleaseHolder.getInstance().getReleaseList()){
+                        for (Release m : ReleaseHolder.getInstance().getReleaseList()){
                             if (m.getRelease().getAbsolutePath().length() >= aktPath.getPath().getAbsolutePath().length()){
                                 if (m.getRelease().getAbsolutePath().substring(0, aktPath.getPath().getAbsolutePath().length()).compareTo(aktPath.getPath().getAbsolutePath()) == 0){
                                     scannedList.add(m);

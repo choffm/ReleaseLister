@@ -20,42 +20,58 @@ package de.vibee.releaselister.model;
 import java.io.File;
 import java.io.Serializable;
 
+
 /**
  *
  * @author vibee
  */
-public class Mp3WithChecksum implements Serializable{
+public class AudioFileWithChecksum implements Serializable{
     
-    private File mp3;
+	public final static String MP3 = "MP3";
+	public final static String FLAC = "FLAC";
+	
+	private File audioFile;
     private long checksum;
-    private boolean mp3IsValid;
-    private boolean mp3Exists;
+    private boolean audioFileIsValid;
+    private boolean audioFileExists;
+    private String type;
     
-    public Mp3WithChecksum(File mp3, long checksum){
-        this.mp3 = mp3;
+    public AudioFileWithChecksum(File audioFile, long checksum, String type){
+        this.audioFile = audioFile;
         this.checksum = checksum;
-        this.mp3Exists = mp3.exists();
+        this.audioFileExists = audioFile.exists();
+        this.type = type;
+    }
+    
+
+    public boolean getAudioFileExists() {
+        return audioFileExists;
     }
 
-    public boolean getMp3Exists() {
-        return mp3Exists;
-    }
+    
 
-    
-    public boolean getMp3IsValid(){
-        return mp3IsValid;
+	public boolean getAudioFileIsValid(){
+        return audioFileIsValid;
     }
     
-    public void setMp3IsValid(boolean mp3IsValid){
-        this.mp3IsValid = mp3IsValid;
+
+	public void setAudioFileIsValid(boolean audioFileIsValid){
+        this.audioFileIsValid = audioFileIsValid;
     }
     
-    public File getMp3(){
-        return this.mp3;
+
+	public File getAudioFile(){
+        return this.audioFile;
     }
     
-    public long getChecksum(){
+ 
+	public long getChecksum(){
         return this.checksum;
     }
+	
+	public String getType(){
+		return type;
+	}
+
     
 }

@@ -35,6 +35,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
@@ -61,6 +62,8 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.io.FileUtils;
 
@@ -68,8 +71,8 @@ import de.vibee.releaselister.control.CRCChecker;
 import de.vibee.releaselister.control.InterruptableRunnable;
 import de.vibee.releaselister.control.Scanner;
 import de.vibee.releaselister.control.Serializer;
-import de.vibee.releaselister.model.MP3Release;
-import de.vibee.releaselister.model.Mp3WithChecksum;
+import de.vibee.releaselister.model.Release;
+import de.vibee.releaselister.model.AudioFileWithChecksum;
 import de.vibee.releaselister.model.ReleaseHolder;
 
 /**
@@ -112,6 +115,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
      * Creates new form ReleaseLister
      */
     private ReleaseLister() {
+    	Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF); 
         okIcon = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/oksmall.jpg"));
         errorIcon = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/badsmall.jpg"));
         Image logo = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/releaseLister.jpg")).getImage();        
@@ -127,6 +131,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
         new Serializer().deserialize(autoSavePath);
         updateTable();
         addListSelectionListener();
+        setBitrateComperator();
         readTagOption = readTagsMenuCheckbox.isSelected();
 
         //Handle Save on exit
@@ -269,7 +274,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
         int verified = 0;
         int ok = 0;
         int notOk = 0;
-        for (MP3Release m : ReleaseHolder.getInstance().getReleaseList()) {
+        for (Release m : ReleaseHolder.getInstance().getReleaseList()) {
             releaseHolderSize += m.getSize();
             boolean accepted = true;
             for (String s : filterList) {
@@ -281,14 +286,14 @@ public final class ReleaseLister extends javax.swing.JFrame {
             if (accepted) {
                 String displaySize = new DecimalFormat("0.00").format(m.getSize() / 1048576) + " MB";
                 String bitrateField = String.valueOf(m.getBitrate()).concat("kb/s");
-                if (m.IsVBR()) {
+                if (m.isVBR()) {
                     bitrateField = bitrateField.concat(" VBR");
                 }
                 String genre = "";
                 String crcStatus = "";
                 if (m.isCrcChecked()) {
                     verified++;
-                    if (m.getReleaseIsValid()) {
+                    if (m.isValid()) {
                         crcStatus = "OK";
                         ok++;
                     } else {
@@ -300,7 +305,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
                     genre = m.getGenre();
                 }
                 
-                tableModel.addRow(new Object[]{m.getRelease().getName(), m.getMp3s().size(),
+                tableModel.addRow(new Object[]{m.getRelease().getName(), m.getAudioFiles().size(),
                             displaySize, bitrateField, genre, m.getRelease().getAbsolutePath(),
                             m, crcStatus, m.getReleaseIsComplete(), !(m.getNfo() == null)});
                 releaseTableSize += m.getSize();
@@ -381,7 +386,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
             }
         ) {
             Class[] types = new Class [] {
-                java.lang.String.class, java.lang.Integer.class, java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, de.vibee.releaselister.model.MP3Release.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class
+                java.lang.String.class, java.lang.Integer.class, java.lang.Long.class, java.lang.String.class, java.lang.String.class, java.lang.String.class, de.vibee.releaselister.model.Release.class, java.lang.String.class, java.lang.Boolean.class, java.lang.Boolean.class
             };
             boolean[] canEdit = new boolean [] {
                 false, false, false, false, false, false, false, false, false, false
@@ -701,12 +706,25 @@ public final class ReleaseLister extends javax.swing.JFrame {
         }
     }
 
+    
+    private void setBitrateComperator(){
+    	  TableRowSorter<DefaultTableModel> rowSorter = (TableRowSorter<DefaultTableModel>)table.getRowSorter();
+          rowSorter.setComparator(COL_BITRATE, new Comparator<String>() {
+  			@Override
+  			public int compare(String o1, String o2) {
+  				int i1 = Integer.valueOf(o1.split("k")[0]);
+  				int i2 = Integer.valueOf(o2.split("k")[0]);
+  				return i1-i2;
+  			}
+  		});
+    }
+    
     /*
      * Adds selection listener to table. Sets mark, unmark, openNfo components
      * depending on selection
      */
     private void addListSelectionListener() {
-        
+
         tableSelectionListener = new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -733,7 +751,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
             }
         };
         table.getSelectionModel().addListSelectionListener(tableSelectionListener);
-        
+      
     }
 
     /*
@@ -874,7 +892,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
             File moveDest = jfc.getSelectedFile();
             for (int i : table.getSelectedRows()) {
                 try {
-                    MP3Release toMove = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
+                    Release toMove = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
                     FileUtils.moveDirectoryToDirectory(toMove.getRelease(), moveDest, true);
                     ReleaseHolder.getInstance().getReleaseList().remove(toMove);
                 } catch (IOException ex) {
@@ -902,7 +920,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
             File moveDest = jfc.getSelectedFile();
             for (int i : table.getSelectedRows()) {
                 try {
-                    MP3Release toCopy = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
+                    Release toCopy = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
                     FileUtils.copyDirectoryToDirectory(toCopy.getRelease(), moveDest);
                 } catch (IOException ex) {
                     Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
@@ -926,14 +944,16 @@ public final class ReleaseLister extends javax.swing.JFrame {
             int[] marked = table.getSelectedRows();
             Arrays.sort(marked);
             for (int i = marked.length - 1; i >= 0; i--) {
-                MP3Release r = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(marked[i]), releaseLister.COL_OBJECT);
+                Release r = (Release) tableModel.getValueAt(table.convertRowIndexToModel(marked[i]), releaseLister.COL_OBJECT);
                 try {
                     FileUtils.deleteDirectory(r.getRelease());
+                    ReleaseHolder.getInstance().getReleaseList().remove(r);
                 } catch (IOException ex) {
                     Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                tableModel.removeRow(table.convertRowIndexToModel(marked[i]));
+                
             }
+            updateTable();
         }
         
     }
@@ -963,7 +983,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
     
     protected void startCrcActionPerformed(java.awt.event.ActionEvent evt) {
         ReleaseLister.getInstance().setEnabled(false);
-        List<MP3Release> toCheck = new LinkedList<>();
+        List<Release> toCheck = new LinkedList<>();
         boolean showConfirm = false;
         for (int i : table.getSelectedRows()) {
             if (!tableModel.getValueAt(table.convertRowIndexToModel(i), releaseLister.COL_CRC_OK).equals("")) {
@@ -986,14 +1006,14 @@ public final class ReleaseLister extends javax.swing.JFrame {
                     options[1]);
             if (value == 0) {
                 for (int r : table.getSelectedRows()) {
-                    toCheck.add((MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
+                    toCheck.add((Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
                 }
                 interruptableRunnable = new CRCChecker(toCheck);
                 new Thread(interruptableRunnable).start();
                 
             } else if (value == 1) {
                 for (int r : table.getSelectedRows()) {
-                    MP3Release m = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT);
+                    Release m = (Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT);
                     if (!m.isCrcChecked()) {
                         toCheck.add(m);
                     }
@@ -1010,7 +1030,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
             
         } else {
             for (int r : table.getSelectedRows()) {
-                toCheck.add((MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
+                toCheck.add((Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
             }
             interruptableRunnable = new CRCChecker(toCheck);
             new Thread(interruptableRunnable).start();
@@ -1166,7 +1186,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
         }
         
         for (int i : table.getSelectedRows()) {
-            MP3Release f = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
+            Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
                     COL_OBJECT);
             if (Desktop.isDesktopSupported()) {
                 try {
@@ -1191,7 +1211,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
         }
         
         for (int i : table.getSelectedRows()) {
-            MP3Release f = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
+            Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
                     COL_OBJECT);
             
             if (Desktop.isDesktopSupported()) {
@@ -1207,7 +1227,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
     protected void playActionPerformed(ActionEvent evt) {
         
         for (int i : table.getSelectedRows()) {
-            MP3Release f = (MP3Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
+            Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
                     COL_OBJECT);
             
             if (Desktop.isDesktopSupported()) {
@@ -1228,8 +1248,8 @@ public final class ReleaseLister extends javax.swing.JFrame {
                         }
                     } else {
                         
-                        for (Mp3WithChecksum mp3 : f.getMp3s()) {
-                            Desktop.getDesktop().open(mp3.getMp3());
+                        for (AudioFileWithChecksum mp3 : f.getAudioFiles()) {
+                            Desktop.getDesktop().open(mp3.getAudioFile());
                         }
                         
                     }

@@ -21,6 +21,7 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.List;
 
+
 /**
  *
  * @author vibee
@@ -28,7 +29,7 @@ import java.util.List;
 public class ReleaseHolder implements Serializable{
     
     private static ReleaseHolder releaseHolder;
-    private List<MP3Release> releaseList = new LinkedList<>();
+    private List<Release> releaseList = new LinkedList<>();
     
     public synchronized static ReleaseHolder getInstance(){
         if (releaseHolder == null){
@@ -37,15 +38,15 @@ public class ReleaseHolder implements Serializable{
         return releaseHolder;
     }
 
-    public List<MP3Release> getReleaseList() {
+    public List<Release> getReleaseList() {
         return releaseList;
     }
 
-    public void setReleaseList(List<MP3Release> releaseList) {
+    public void setReleaseList(List<Release> releaseList) {
         this.releaseList = releaseList;
     }
     
-    public void addRelease(MP3Release release){
+    public void addRelease(Release release){
         releaseList.add(release);
     }
     
