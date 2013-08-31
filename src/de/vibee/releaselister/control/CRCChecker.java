@@ -58,7 +58,7 @@ public class CRCChecker extends InterruptableRunnable{
         if (Thread.currentThread().isInterrupted()) {
             return;
         }
-        if (!release.getReleaseIsComplete()){
+        if (!release.isReleaseComplete()){
             release.setReleaseIsValid(false);
             return;
         }

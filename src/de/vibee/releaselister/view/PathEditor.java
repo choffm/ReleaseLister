@@ -23,6 +23,7 @@ import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -41,7 +42,7 @@ public class PathEditor extends javax.swing.JFrame {
      * Creates new form PathEditor
      */
     private static PathEditor pathEditor;
-    private List<ReleasePath> path;
+    private Set<ReleasePath> paths;
     private DefaultTableModel model;
     
     public PathEditor() {
@@ -90,11 +91,11 @@ public class PathEditor extends javax.swing.JFrame {
     };
    
     private void updatePathTable(){
-        this.path = PathHolder.getInstance().getPathList();
+        this.paths = PathHolder.getInstance().getPathList();
         while (model.getRowCount() != 0) {
             model.removeRow(0);
         }
-        for (ReleasePath p : path){
+        for (ReleasePath p : paths){
             model.addRow(new Object[]{p.getPath().getAbsolutePath()});
         }
     }

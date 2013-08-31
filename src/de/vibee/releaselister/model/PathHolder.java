@@ -18,8 +18,10 @@
 package de.vibee.releaselister.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -27,15 +29,15 @@ import java.util.List;
  */
 public class PathHolder implements Serializable{
     private static PathHolder pathHolder;
-    private List<ReleasePath> pathList = new LinkedList<>();
+    private Set<ReleasePath> pathList = new HashSet<>();
 
-    public List<ReleasePath> getPathList() {
+    public Set<ReleasePath> getPathList() {
         for (ReleasePath r : pathList){
         }
         return pathList;
     }
 
-    public void setPathList(List<ReleasePath> pathList) {
+    public void setPathList(Set<ReleasePath> pathList) {
         this.pathList = pathList;
     }
     

@@ -18,8 +18,10 @@
 package de.vibee.releaselister.model;
 
 import java.io.Serializable;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -29,7 +31,7 @@ import java.util.List;
 public class ReleaseHolder implements Serializable{
     
     private static ReleaseHolder releaseHolder;
-    private List<Release> releaseList = new LinkedList<>();
+    private Set<Release> releaseList = new HashSet<>();
     
     public synchronized static ReleaseHolder getInstance(){
         if (releaseHolder == null){
@@ -38,11 +40,11 @@ public class ReleaseHolder implements Serializable{
         return releaseHolder;
     }
 
-    public List<Release> getReleaseList() {
+    public Set<Release> getReleaseList() {
         return releaseList;
     }
 
-    public void setReleaseList(List<Release> releaseList) {
+    public void setReleaseList(Set<Release> releaseList) {
         this.releaseList = releaseList;
     }
     

@@ -19,8 +19,10 @@ package de.vibee.releaselister.control;
 
 
 import java.io.File;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -45,25 +47,25 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     
     private int counter;
     private boolean readTagOption;
-    private List<Release> scannedList;
+    private Set<Release> scannedList;
     private ActionFrame actionFrame;
     
     public Scanner(boolean readTagOption){
         this.readTagOption = readTagOption;
-        scannedList = new LinkedList<>();
+        scannedList = new HashSet<>();
     }
 
     /**
      * Recursive scan function, scans the input path recursively for MP3 Releases
-     * @param path path where the scan starts recursively
+     * @param root path where the scan starts recursively
      * @return List of MP3Releases which have been found in current directory
      */
-    public void scanForReleases(File path){
+    public void scanForReleases(File root){
         List<File> dirs = new LinkedList<>();
         
-        if (path != null){
+        if (root != null){
             
-            for (File f : path.listFiles()){
+            for (File f : root.listFiles()){
                 
                 if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
                     return;
@@ -90,7 +92,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
                             }
                             
                             if (sfv != null){
-                            	if (f.getName().contains("-FLAC")){
+                            	if (f.getName().contains("-FLAC-")){
                             		scannedList.add(new Release(f,sfv,nfo, readTagOption, Release.FLAC));
                             	}
                             	else{
@@ -119,7 +121,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
             ReleaseLister.getInstance().setStatusLabel("Path not found");
         }
         
-        if (dirs != null){
+        if (!dirs.isEmpty()){
             
             for (File f : dirs){
                 if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){

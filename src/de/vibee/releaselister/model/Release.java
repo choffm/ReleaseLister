@@ -33,7 +33,6 @@ import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
 import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
 import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
-import org.jaudiotagger.audio.mp3.MP3File;
 import org.jaudiotagger.tag.FieldKey;
 import org.jaudiotagger.tag.TagException;
 
@@ -48,29 +47,30 @@ import org.jaudiotagger.tag.TagException;
  */
 public class Release implements Serializable{
     
+	public final static String MP3 = "MP3";
+    public final static String FLAC = "FLAC";
+	
     private File release;
     private File sfv;
     private File nfo;
     private List<AudioFileWithChecksum> audioFiles;
-    private long size = 0;
+    private float size = 0;
     private boolean readTag;
     private long bitrate;
     private boolean VBR;
     private String genre;
     private boolean valid;
     private boolean releaseIsComplete;
-    private boolean releaseIsCrcChecked;
-    public final static String MP3 = "MP3";
-    public final static String FLAC = "FLAC";
+    private boolean releaseIsCrcChecked;    
     private String type;
     
     
-	public boolean getReleaseIsComplete() {
+	public boolean isReleaseComplete() {
         return releaseIsComplete;
     }
 
     
-	public void setReleaseIsComplete(boolean releaseIsComplete) {
+	public void setComplete(boolean releaseIsComplete) {
         this.releaseIsComplete = releaseIsComplete;
     }
     
@@ -91,7 +91,7 @@ public class Release implements Serializable{
     }
     
     
-	public long getSize() {
+	public float getSize() {
         return size;
     }
     
@@ -130,7 +130,6 @@ public class Release implements Serializable{
         if (nfo != null){
             this.nfo = nfo;
         }
-        this.readTag = readTag;
         this.audioFiles = new LinkedList<>();
         this.releaseIsCrcChecked = false;
         
@@ -159,6 +158,7 @@ public class Release implements Serializable{
                 	
                 	if (af.getTag().hasField(FieldKey.GENRE)){
                 		this.genre = af.getTag().getFirst(FieldKey.GENRE);
+                		this.readTag = true;
                 	}
 
                     else{
@@ -248,7 +248,11 @@ public class Release implements Serializable{
 //        this.release = release;
 //    }
     
-	public File getRelease() {
+    public String getType(){
+    	return type;
+    }
+    
+    public File getRelease() {
         return release;
     }
 //    public void setRelease(File release) {
