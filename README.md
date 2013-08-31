@@ -38,4 +38,5 @@ Upcoming Features
 ===========
 
 - Provide a command line interface
-- Implementation of FLAC Release support
+- Improve UI experience
+- Include SQLite support
