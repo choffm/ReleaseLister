@@ -18,60 +18,37 @@ package de.vibee.releaselister.view;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Desktop;
 import java.awt.Image;
-import java.awt.MouseInfo;
-import java.awt.PopupMenu;
-import java.awt.Toolkit;
-import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.KeyEvent;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.DefaultRowSorter;
 import javax.swing.ImageIcon;
 import javax.swing.InputMap;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableRowSorter;
 
-import org.apache.commons.io.FileUtils;
-
 import de.vibee.releaselister.control.Actions;
-import de.vibee.releaselister.control.CRCChecker;
 import de.vibee.releaselister.control.InterruptableRunnable;
-import de.vibee.releaselister.control.Scanner;
 import de.vibee.releaselister.control.Serializer;
 import de.vibee.releaselister.model.Release;
-import de.vibee.releaselister.model.AudioFileWithChecksum;
 import de.vibee.releaselister.model.ReleaseHolder;
 
 /**
@@ -80,14 +57,13 @@ import de.vibee.releaselister.model.ReleaseHolder;
  */
 public final class ReleaseLister extends javax.swing.JFrame {
 
-//	private static ReleaseLister releaseLister;
 	private ListSelectionListener tableSelectionListener;
 	private DefaultTableModel tableModel;
 	private GuiComponents guiComponents;
 	private String autoSavePath = System.getProperty("user.home") + File.separator
 			+ ".ReleaseLister" + File.separator + "autosave.rlist";
 	;
-	private final String version = "1.0b1";
+	public final String version = "20130831-1";
 	public final int COL_RELEASENAME = 0;
 	public final int COL_AMOUNT_OF_FILES = 1;
 	public final int COL_RELEASE_SIZE = 2;
@@ -98,23 +74,23 @@ public final class ReleaseLister extends javax.swing.JFrame {
 	public final int COL_CRC_OK = 7;
 	public final int COL_ISCOMPLETE = 8;
 	public final int COL_HASNFO = 9;
-	ImageIcon okIcon;
-	ImageIcon errorIcon;
+	private ImageIcon okIcon;
+	private ImageIcon errorIcon;
 	private boolean readTagOption;
-	InterruptableRunnable interruptableRunnable;
-	JLabel okIconLabelBright;
-	JLabel falseIconLabelBright;
-	JLabel okIconLabelDark;
-	JLabel falseIconLabelDark;
-	JLabel okIconLabelSelected;
-	JLabel falseIconLabelSelected;
-	PopUpMenu popupMenu;
+	private InterruptableRunnable interruptableRunnable;
+	private JLabel okIconLabelBright;
+	private JLabel falseIconLabelBright;
+	private JLabel okIconLabelDark;
+	private JLabel falseIconLabelDark;
+	private JLabel okIconLabelSelected;
+	private JLabel falseIconLabelSelected;
+	private PopUpMenu popupMenu;
 
 	/**
 	 * Creates new form ReleaseLister
 	 */
 	private ReleaseLister() {
-		Logger.getLogger("org.jaudiotagger").setLevel(Level.OFF); 
+		
 		okIcon = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/oksmall.jpg"));
 		errorIcon = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/badsmall.jpg"));
 		Image logo = new ImageIcon(ReleaseLister.class.getResource("/de/vibee/releaselister/images/releaseLister.jpg")).getImage();        
@@ -124,13 +100,12 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		prerenderIconLabels();
 		guiComponents = GuiComponents.getInstance();
 		addMenuItemsToGuiCoponents();
-//		instantiatePopupMenu();
 		initTablePreSort();
 		tableModel = (DefaultTableModel) table.getModel();
 		new Serializer().deserialize(autoSavePath);
 		updateTable();
 		addListSelectionListener();
-		setBitrateComperator();
+		setComperators();
 		readTagOption = readTagsMenuCheckbox.isSelected();
 
 		//Handle Save on exit
@@ -141,13 +116,11 @@ public final class ReleaseLister extends javax.swing.JFrame {
 			}
 		}));
 
-		int condition = JTextPane.WHEN_FOCUSED;
-		InputMap iMap = filterPane.getInputMap(condition);
+		InputMap iMap = filterPane.getInputMap(JComponent.WHEN_FOCUSED);
 		ActionMap aMap = filterPane.getActionMap();
 
-		String enter = "enter";
-		iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), enter);
-		aMap.put(enter, new AbstractAction() {
+		iMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter");
+		aMap.put("enter", new AbstractAction() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				updateTable();
@@ -395,11 +368,13 @@ public final class ReleaseLister extends javax.swing.JFrame {
 					false, false, false, false, false, false, false, false, false, false
 			};
 
+			@Override
 			public Class getColumnClass(int columnIndex) {
 
 				return types [columnIndex];
 			}
 
+			@Override
 			public boolean isCellEditable(int rowIndex, int columnIndex) {
 				return canEdit [columnIndex];
 			}
@@ -410,6 +385,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		table.setSelectionForeground(new java.awt.Color(0, 0, 0));
 		table.getTableHeader().setReorderingAllowed(false);
 		table.addMouseListener(new java.awt.event.MouseAdapter() {
+			@Override
 			public void mouseClicked(java.awt.event.MouseEvent evt) {
 				tableMouseClicked(evt);
 			}
@@ -426,6 +402,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 		filterButton.setText("Filter");
 		filterButton.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				filterButtonActionPerformed(evt);
 			}
@@ -438,6 +415,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		startScanMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
 		startScanMenuItem.setText("Start Scan");
 		startScanMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				startScanMenuItemActionPerformed(evt);
 			}
@@ -447,6 +425,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		startCrcMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_C, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
 		startCrcMenuItem.setText("Start CRC Check");
 		startCrcMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				startCrcMenuItemActionPerformed(evt);
 			}
@@ -456,6 +435,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		changePathMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_P, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
 		changePathMenuItem.setText("Change Paths");
 		changePathMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				changePathMenuItemActionPerformed(evt);
 			}
@@ -464,6 +444,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 		loadMenuItem.setText("Load");
 		loadMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				loadMenuItemActionPerformed(evt);
 			}
@@ -472,6 +453,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 		saveMenuItem1.setText("Save");
 		saveMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				saveMenuItem1ActionPerformed(evt);
 			}
@@ -481,6 +463,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		exportTxtMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
 		exportTxtMenuItem.setText("Export as .txt");
 		exportTxtMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				exportTxtMenuItemActionPerformed(evt);
 			}
@@ -489,6 +472,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 		exitMenuItem.setText("Exit");
 		exitMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				exitMenuItemActionPerformed(evt);
 			}
@@ -504,6 +488,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		selectAllMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_A, java.awt.event.InputEvent.CTRL_MASK));
 		selectAllMenuItem.setText("Select all");
 		selectAllMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				selectAllMenuItemActionPerformed(evt);
 			}
@@ -513,6 +498,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		clearListMenuItem.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_DELETE, java.awt.event.InputEvent.SHIFT_MASK | java.awt.event.InputEvent.CTRL_MASK));
 		clearListMenuItem.setText("Clear List");
 		clearListMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				clearListMenuItemActionPerformed(evt);
 			}
@@ -526,6 +512,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		readTagsMenuCheckbox.setSelected(true);
 		readTagsMenuCheckbox.setText("Read Tags");
 		readTagsMenuCheckbox.addItemListener(new java.awt.event.ItemListener() {
+			@Override
 			public void itemStateChanged(java.awt.event.ItemEvent evt) {
 				readTagsMenuCheckboxItemStateChanged(evt);
 			}
@@ -540,6 +527,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 		aboutMenuItem.setText("About");
 		aboutMenuItem.addActionListener(new java.awt.event.ActionListener() {
+			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				aboutMenuItemActionPerformed(evt);
 			}
@@ -702,14 +690,14 @@ public final class ReleaseLister extends javax.swing.JFrame {
 	/**
 	 * Clears the whole table
 	 */
-	protected void clearTable() {
+	public void clearTable() {
 		while (tableModel.getRowCount() != 0) {
 			tableModel.removeRow(0);
 		}
 	}
 
 
-	private void setBitrateComperator(){
+	private void setComperators(){
 		TableRowSorter<DefaultTableModel> rowSorter = (TableRowSorter<DefaultTableModel>)table.getRowSorter();
 		rowSorter.setComparator(COL_BITRATE, new Comparator<String>() {
 			@Override
@@ -822,7 +810,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 				}
 
 				label.setOpaque(true);
-				label.setHorizontalAlignment(JLabel.CENTER);
+				label.setHorizontalAlignment(SwingConstants.CENTER);
 
 				return label;
 
@@ -840,14 +828,6 @@ public final class ReleaseLister extends javax.swing.JFrame {
 	 */
 	public JTable getTable() {
 		return this.table;
-	}
-
-	public DefaultTableModel getTableModel() {
-		return tableModel;
-	}
-
-	public JLabel getStatusLabel() {
-		return statusLabel;
 	}
 
 	public void setStatusLabel(String text) {

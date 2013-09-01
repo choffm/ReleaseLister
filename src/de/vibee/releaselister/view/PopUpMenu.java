@@ -22,17 +22,14 @@ public class PopUpMenu extends JPopupMenu{
 	protected JMenuItem copyToPopupItem = new JMenuItem("Copy Release(s) to...");
 	protected JMenuItem deletePopupItem = new JMenuItem("Delete Release(s)");
 
-	JMenuItem[] popupMenuItems = {
+	private JMenuItem[] popupMenuItems = {
 			openBrowserPopupItem, openNFOPopupItem, playPopupItem,
 			copyNamePopupItem, copyPathPopupItem, moveToPopupItem,
 			copyToPopupItem, deletePopupItem
 	};
 	
-	JDialog invoker = new JDialog();
+	private JDialog invoker = new JDialog();
 	
-	public PopUpMenu getOuter(){
-		return this;
-	}
 	final ReleaseLister mainWindow;
 	
 	

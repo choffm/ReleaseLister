@@ -50,6 +50,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     private Set<Release> scannedList;
     private ActionFrame actionFrame;
     ReleaseLister mainWindow;
+    long time;
     
     public Scanner(boolean readTagOption, ReleaseLister mainWindow){
         this.readTagOption = readTagOption;
@@ -102,7 +103,8 @@ public class Scanner extends InterruptableRunnable implements Runnable {
                             	}
                                 
                                 counter++;
-                                actionFrame.setStatusLabelText("Found " +  counter + " Releases");
+                                long timeTaken = System.currentTimeMillis() - time;
+                                actionFrame.setStatusLabelText("Found " +  counter + " Releases (" + ((counter*1000)/(timeTaken)) + " Releases/s)");
                             }
                             
                         }
@@ -120,7 +122,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
         }
         
         else{
-//            ReleaseLister.getInstance().setStatusLabel("Path not found");
+            mainWindow.setStatusLabel("Path not found");
         }
         
         if (!dirs.isEmpty()){
@@ -146,6 +148,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     @Override
     public void run() {
         resetCounter();
+        time = System.currentTimeMillis();
         actionFrame = new ActionFrame(mainWindow);
         actionFrame.getProgressBar().setIndeterminate(true);
         actionFrame.getProgressBar().setMinimum(0);

@@ -106,7 +106,7 @@ public class CRCChecker extends InterruptableRunnable{
         for (Release release : toCheck){
             timeGone = System.currentTimeMillis() - time;
             actionFrame.setStatusLabelText("Veryfied " + counter + " of " + 
-                    toCheck.size() + " Releases (" + (long)(size / timeGone) / 1024 + " MB/s)");
+                    toCheck.size() + " Releases (" + size / timeGone / 1024 + " MB/s)");
             if (this.isInterrupted()){
                 actionFrame.setStatusLabelText("Verify aborted.");
                 actionFrame.setOkButtonEnabled(true);
@@ -127,7 +127,7 @@ public class CRCChecker extends InterruptableRunnable{
         }
         
         actionFrame.setStatusLabelText(countValid + " valid and " + countInvalid + 
-                " invalid Releases verfied (" + (long)(size / timeGone) / 1024 + " MB/s).");
+                " invalid Releases verfied (" + size / timeGone / 1024 + " MB/s).");
         actionFrame.setAbortButtonEnabled(false);
         actionFrame.setOkButtonEnabled(true);
             

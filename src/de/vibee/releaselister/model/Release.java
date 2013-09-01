@@ -46,243 +46,226 @@ import org.jaudiotagger.tag.TagException;
  * @author vibee
  */
 public class Release implements Serializable{
-    
+
 	public final static String MP3 = "MP3";
-    public final static String FLAC = "FLAC";
-	
-    private File release;
-    private File sfv;
-    private File nfo;
-    private List<AudioFileWithChecksum> audioFiles;
-    private float size = 0;
-    private boolean readTag;
-    private long bitrate;
-    private boolean VBR;
-    private String genre;
-    private boolean valid;
-    private boolean releaseIsComplete;
-    private boolean releaseIsCrcChecked;    
-    private String type;
-    
-    
+	public final static String FLAC = "FLAC";
+
+	private File release;
+	private File sfv;
+	private File nfo;
+	private List<AudioFileWithChecksum> audioFiles;
+	private float size = 0;
+	private boolean readTag;
+	private long bitrate;
+	private boolean VBR;
+	private String genre;
+	private boolean valid;
+	private boolean releaseIsComplete = true;
+	private boolean releaseIsCrcChecked;    
+	private String type;
+
+
 	public boolean isReleaseComplete() {
-        return releaseIsComplete;
-    }
+		return releaseIsComplete;
+	}
 
-    
+
 	public void setComplete(boolean releaseIsComplete) {
-        this.releaseIsComplete = releaseIsComplete;
-    }
-    
-    
+		this.releaseIsComplete = releaseIsComplete;
+	}
+
+
 	public void setReleaseIsValid(boolean isValid){
-        this.valid = isValid;
-        this.releaseIsCrcChecked = true;
-    }
-    
-    
+		this.valid = isValid;
+		this.releaseIsCrcChecked = true;
+	}
+
+
 	public boolean isCrcChecked(){
-        return releaseIsCrcChecked;
-    }
-    
-    
+		return releaseIsCrcChecked;
+	}
+
+
 	public boolean isValid(){
-        return valid;
-    }
-    
-    
+		return valid;
+	}
+
+
 	public float getSize() {
-        return size;
-    }
-    
-    
+		return size;
+	}
+
+
 	public String getGenre(){
-        return genre;
-    }
+		return genre;
+	}
 
-    
+
 	public long getBitrate() {
-        return bitrate;
-    }
+		return bitrate;
+	}
 
-    public boolean isVBR() {
-        return VBR;
-    }
-    
-    
+	public boolean isVBR() {
+		return VBR;
+	}
+
+
 	public boolean hasTag(){
-        return readTag;
-    }
-    
-    /**
-     * 
-     * @param release Path to release
-     * @param sfv Path to sfv file
-     * @param nfo Path to nfo file
-     * @param readTag True if tag shall be read for genre information (slightly slower)
-     */
-    public Release(File release, File sfv, File nfo, boolean readTag, String type){
-    	
-    	
-    	this.type = type;
-        this.release = release;
-        this.sfv = sfv;
-        if (nfo != null){
-            this.nfo = nfo;
-        }
-        this.audioFiles = new LinkedList<>();
-        this.releaseIsCrcChecked = false;
-        
-        extractAudioFilesFromSfv(type);
-        
-        
-        if (audioFiles.size() > 0){
-            for (AudioFileWithChecksum audioFile : audioFiles){
-                if (audioFile.getAudioFileExists()){
-                    size += audioFile.getAudioFile().length();
-                }
-            }
-            AudioFileWithChecksum firstAudioFile = null;
-            for (AudioFileWithChecksum m : audioFiles){
-                if (m.getAudioFileExists()){
-                    firstAudioFile = m;
-                    break;
-                }
-            }
-            if (firstAudioFile != null){
-            try {
-            	AudioFile af = AudioFileIO.read(firstAudioFile.getAudioFile());
-            	this.bitrate = Long.valueOf(af.getAudioHeader().getBitRate().replaceAll("[^\\d.]", ""));
-                this.VBR = af.getAudioHeader().isVariableBitRate();
-                if (readTag && af.getTag() != null){
-                	
-                	if (af.getTag().hasField(FieldKey.GENRE)){
-                		this.genre = af.getTag().getFirst(FieldKey.GENRE);
-                		this.readTag = true;
-                	}
+		return readTag;
+	}
 
-                    else{
-                        this.readTag = false;
-                    }
-                }
-                else{
-                	this.readTag = false;
-                }
-            } catch (IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException | CannotReadException ex) {
-                Logger.getLogger(Release.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        }
-        }
-        
-    }
-    
-    
-    private void extractAudioFilesFromSfv(String type){
-       
-        try{
-            BufferedReader in = new BufferedReader(new FileReader(sfv));
-            String zeile;
-            this.releaseIsComplete = true;
-            while ((zeile = in.readLine()) != null){
-            	if (type == FLAC){
-            		if (!zeile.contains(";") && Pattern.matches(".+.flac +[A-Fa-f0-9]{8} *$", zeile)){
-                        zeile = zeile.trim();
-                        int endOfFileDeclaration = zeile.lastIndexOf(".flac") + 5;
-                        File audioFile = new File(this.sfv.getParentFile() + File.separator + zeile.substring(0, endOfFileDeclaration));
-                        String CRCString = zeile.substring(endOfFileDeclaration+1, zeile.length());
-                        while (CRCString.contains(" ")){
-                            CRCString = CRCString.replace(" ", "");
-                        }
+	/**
+	 * 
+	 * @param release Path to release
+	 * @param sfv Path to sfv file
+	 * @param nfo Path to nfo file
+	 * @param readTag True if tag shall be read for genre information (slightly slower)
+	 */
+	public Release(File release, File sfv, File nfo, boolean readTag, String type){
 
-                        long crcExpected = Long.valueOf(CRCString, 16);
-                        AudioFileWithChecksum track = new  AudioFileWithChecksum(audioFile, crcExpected, AudioFileWithChecksum.FLAC);
-                        
-                        if (!track.getAudioFileExists()){
-                            this.releaseIsComplete = false;
-                        }
-                        
-                        this.audioFiles.add(track);
-                    }
-            	}
-            	else if (type == MP3){
-            		if (!zeile.contains(";") && Pattern.matches(".+.mp3 +[A-Fa-f0-9]{8} *$", zeile)){
-                        
-                        while (zeile.charAt(0) == ' '){
-                            zeile = zeile.substring(1);
-                        }
-                        int endOfAudioFileDeclaration = zeile.lastIndexOf(".mp3") + 4;
-                        File mp3File = new File(this.sfv.getParentFile() + File.separator + zeile.substring(0, endOfAudioFileDeclaration));
-                        String CRCString = zeile.substring(endOfAudioFileDeclaration+1, zeile.length());
-                        while (CRCString.contains(" ")){
-                            CRCString = CRCString.replace(" ", "");
-                        }
 
-                        long crcExpected = Long.valueOf(CRCString, 16);
-                        AudioFileWithChecksum mp3 = new  AudioFileWithChecksum(mp3File, crcExpected, AudioFileWithChecksum.MP3);
-                        
-                        if (!mp3.getAudioFileExists()){
-                            this.releaseIsComplete = false;
-                        }
-                        
-                        this.audioFiles.add(mp3);
-                    }
-            	}
-                
-            }
-            in.close();
-            
-            if (this.audioFiles.isEmpty()){
-                this.releaseIsComplete = false;
-            }
-            
-        }
-        catch(IOException | NumberFormatException e){
-            
-        }
-      
-    }
-    
+		this.type = type;
+		this.release = release;
+		this.sfv = sfv;
 
-//    public MP3Release(File release){
-//        this.release = release;
-//    }
-    
-    public String getType(){
-    	return type;
-    }
-    
-    public File getRelease() {
-        return release;
-    }
-//    public void setRelease(File release) {
-//        this.release = release;
-//    }
-    
+		if (nfo != null){
+			this.nfo = nfo;
+		}
+
+		this.audioFiles = new LinkedList<>();
+		this.releaseIsCrcChecked = false;
+
+		extractAudioFilesFromSfv(type);
+
+
+		if (audioFiles.size() > 0){
+			for (AudioFileWithChecksum audioFile : audioFiles){
+				if (audioFile.getAudioFileExists()){
+					size += audioFile.getAudioFile().length();
+				}
+			}
+
+			for (AudioFileWithChecksum m : audioFiles){
+				if (m.getAudioFileExists()){
+					try {
+						AudioFile af = AudioFileIO.read(m.getAudioFile());
+						this.bitrate = Long.valueOf(af.getAudioHeader().getBitRate().replaceAll("[^\\d.]", ""));
+						this.VBR = af.getAudioHeader().isVariableBitRate();
+						if (readTag && af.getTag() != null){
+
+							if (af.getTag().hasField(FieldKey.GENRE)){
+								this.genre = af.getTag().getFirst(FieldKey.GENRE);
+								this.readTag = true;
+							}
+
+							else{
+								this.readTag = false;
+							}
+						}
+						else{
+							this.readTag = false;
+						}
+					} catch (IOException | TagException | ReadOnlyFileException | InvalidAudioFrameException | CannotReadException ex) {
+						Logger.getLogger(Release.class.getName()).log(Level.SEVERE, null, ex);
+					}
+					return;
+				}
+			}
+
+		}
+
+	}
+
+
+	private void extractAudioFilesFromSfv(String type){
+		BufferedReader br = null;
+		try{
+			br = new BufferedReader(new FileReader(sfv), 8192);
+			String line;
+			while ((line = br.readLine()) != null){
+				if (type == FLAC){
+					if (!line.contains(";") && Pattern.matches(".+.flac +[A-Fa-f0-9]{8} *$", line)){
+						line = line.trim();
+						int endOfFileDeclaration = line.lastIndexOf(".flac") + 5;
+						File audioFile = new File(this.sfv.getParentFile() + File.separator + line.substring(0, endOfFileDeclaration));
+						String CRCString = line.substring(endOfFileDeclaration+1, line.length());
+						CRCString = CRCString.trim();
+
+						long crcExpected = Long.valueOf(CRCString, 16);
+						AudioFileWithChecksum track = new  AudioFileWithChecksum(audioFile, crcExpected, AudioFileWithChecksum.FLAC);
+
+						if (!track.getAudioFileExists()){
+							this.releaseIsComplete = false;
+						}
+
+						this.audioFiles.add(track);
+					}
+				}
+				else if (type == MP3){
+					if (!line.contains(";") && Pattern.matches(".+.mp3 +[A-Fa-f0-9]{8} *$", line)){
+
+						line = line.trim();
+						int endOfAudioFileDeclaration = line.lastIndexOf(".mp3") + 4;
+						File mp3File = new File(this.sfv.getParentFile() + File.separator + line.substring(0, endOfAudioFileDeclaration));
+						String CRCString = line.substring(endOfAudioFileDeclaration+1, line.length());
+						CRCString = CRCString.trim();
+
+						long crcExpected = Long.valueOf(CRCString, 16);
+						AudioFileWithChecksum mp3 = new  AudioFileWithChecksum(mp3File, crcExpected, AudioFileWithChecksum.MP3);
+
+						if (!mp3.getAudioFileExists()){
+							this.releaseIsComplete = false;
+						}
+
+						this.audioFiles.add(mp3);
+					}
+				}
+
+			}
+
+			if (this.audioFiles.isEmpty()){
+				this.releaseIsComplete = false;
+			}
+
+		}
+		catch(IOException | NumberFormatException e){
+			System.out.println("Error while reading sfv file.");
+		}
+		finally{
+			try {
+				br.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+	}
+
+
+	public String getType(){
+		return type;
+	}
+
+	public File getRelease() {
+		return release;
+	}
+
+
 	public File getSfv() {
-        return sfv;
-    }
-//    public void setSfv(File sfvName) {
-//        this.sfv = sfvName;
-//    }
-    
+		return sfv;
+	}
+
+
 	public File getNfo() {
-        return nfo;
-    }
-//    public void setNfo(File nfoName) {
-//        this.nfo = nfoName;
-//    }
-    
+		return nfo;
+	}
+
+
 	public List<AudioFileWithChecksum> getAudioFiles() {
-        return audioFiles;
-    }
-//    public void setMp3s(List<Mp3WithChecksum> mp3s) {
-//        this.mp3s = mp3s;
-//    }
-//    public void addMP3(Mp3WithChecksum mp3){
-//        mp3s.add(mp3);
-//    }
+		return audioFiles;
+	}
 
 
-    
+
+
 }

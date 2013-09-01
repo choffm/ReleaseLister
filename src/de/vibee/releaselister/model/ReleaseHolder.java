@@ -19,8 +19,6 @@ package de.vibee.releaselister.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 
@@ -28,6 +26,7 @@ import java.util.Set;
  *
  * @author vibee
  */
+@SuppressWarnings("serial")
 public class ReleaseHolder implements Serializable{
     
     private static ReleaseHolder releaseHolder;
