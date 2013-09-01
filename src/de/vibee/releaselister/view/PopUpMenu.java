@@ -1,11 +1,6 @@
 package de.vibee.releaselister.view;
 
-import java.awt.Color;
 import java.awt.MouseInfo;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-
-import javax.swing.JDialog;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 
@@ -28,7 +23,6 @@ public class PopUpMenu extends JPopupMenu{
 			copyToPopupItem, deletePopupItem
 	};
 	
-	private JDialog invoker = new JDialog();
 	
 	final ReleaseLister mainWindow;
 	
@@ -38,11 +32,8 @@ public class PopUpMenu extends JPopupMenu{
 		for (JMenuItem c : popupMenuItems) {
 			this.add(c);
 		}
-		invoker.setUndecorated(true);
-		invoker.setVisible(false);
+
 		this.setVisible(false);
-		invoker.add(this);
-		invoker.pack();
 		this.mainWindow = mainWindow;
 		initPopupMenu();
 		
@@ -55,7 +46,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).openBrowserActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -63,7 +53,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).openNFOActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -71,7 +60,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).playActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -80,7 +68,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).copyReleaseNameActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -88,7 +75,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).copyPathNameActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -96,7 +82,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).moveToActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -104,7 +89,6 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).copyToActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
@@ -112,58 +96,16 @@ public class PopUpMenu extends JPopupMenu{
 			@Override
 			public void actionPerformed(java.awt.event.ActionEvent evt) {
 				new Actions(mainWindow).deleteReleasesActionPerformed(evt);
-				hidePopup();
 			}
 		});
 
-		for (final JMenuItem c : popupMenuItems) {
-			c.addMouseListener(new java.awt.event.MouseAdapter() {
-				@Override
-				public void mouseEntered(java.awt.event.MouseEvent evt) {
-					c.setOpaque(true);
-					c.setBackground(Color.LIGHT_GRAY);
-				}
-
-				@Override
-				public void mouseExited(java.awt.event.MouseEvent evt) {
-					uncolorPopupItems(c);
-				}
-			});
-		}
-
-		invoker.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				invoker.setVisible(false);
-				PopUpMenu.this.setVisible(false);
-			}
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				invoker.setVisible(true);
-				PopUpMenu.this.setVisible(true);
-			}
-		});
-		
-		this.setLocation(MouseInfo.getPointerInfo().getLocation());
-		invoker.setLocation(MouseInfo.getPointerInfo().getLocation());
 
 	}
 	
 	protected void showPopup() {
-		this.setLocation(MouseInfo.getPointerInfo().getLocation());
-		invoker.setLocation(MouseInfo.getPointerInfo().getLocation());
-
-		invoker.setVisible(true);
+		this.show(mainWindow, MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y);
 	}
 	
-	protected void hidePopup(){
-		invoker.setVisible(false);
-	}
 
-	private void uncolorPopupItems(JMenuItem j) {
-		j.setOpaque(false);
-		j.setBackground(Color.green); //totally idiotic but it works
-	}
 	
 }
