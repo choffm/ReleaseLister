@@ -21,6 +21,7 @@ import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Image;
 import java.awt.MouseInfo;
+import java.awt.PopupMenu;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
@@ -49,9 +50,7 @@ import javax.swing.InputMap;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
@@ -62,11 +61,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
 
 import org.apache.commons.io.FileUtils;
 
+import de.vibee.releaselister.control.Actions;
 import de.vibee.releaselister.control.CRCChecker;
 import de.vibee.releaselister.control.InterruptableRunnable;
 import de.vibee.releaselister.control.Scanner;
@@ -81,7 +80,7 @@ import de.vibee.releaselister.model.ReleaseHolder;
  */
 public final class ReleaseLister extends javax.swing.JFrame {
 
-	private static ReleaseLister releaseLister;
+//	private static ReleaseLister releaseLister;
 	private ListSelectionListener tableSelectionListener;
 	private DefaultTableModel tableModel;
 	private GuiComponents guiComponents;
@@ -89,7 +88,6 @@ public final class ReleaseLister extends javax.swing.JFrame {
 			+ ".ReleaseLister" + File.separator + "autosave.rlist";
 	;
 	private final String version = "1.0b1";
-	protected boolean actionInProgress = false;
 	public final int COL_RELEASENAME = 0;
 	public final int COL_AMOUNT_OF_FILES = 1;
 	public final int COL_RELEASE_SIZE = 2;
@@ -110,6 +108,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 	JLabel falseIconLabelDark;
 	JLabel okIconLabelSelected;
 	JLabel falseIconLabelSelected;
+	PopUpMenu popupMenu;
 
 	/**
 	 * Creates new form ReleaseLister
@@ -125,7 +124,7 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		prerenderIconLabels();
 		guiComponents = GuiComponents.getInstance();
 		addMenuItemsToGuiCoponents();
-		instantiatePopupMenu();
+//		instantiatePopupMenu();
 		initTablePreSort();
 		tableModel = (DefaultTableModel) table.getModel();
 		new Serializer().deserialize(autoSavePath);
@@ -160,6 +159,10 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 	}
 
+	private void setPopupMenu(PopUpMenu popupMenu){
+		this.popupMenu = popupMenu;
+	}
+	
 	private void prerenderIconLabels() {
 
 		okIconLabelBright = new JLabel(okIcon);
@@ -183,12 +186,12 @@ public final class ReleaseLister extends javax.swing.JFrame {
 
 	}
 
-	public synchronized static ReleaseLister getInstance() {
-		if (releaseLister == null) {
-			releaseLister = new ReleaseLister();
-		}
-		return releaseLister;
-	}
+//	public synchronized static ReleaseLister getInstance() {
+//		if (releaseLister == null) {
+//			releaseLister = new ReleaseLister();
+//		}
+//		return releaseLister;
+//	}
 
 	private void initTablePreSort() {
 		table.getColumnModel().removeColumn(table.getColumnModel().getColumn(COL_OBJECT));
@@ -590,51 +593,48 @@ public final class ReleaseLister extends javax.swing.JFrame {
 				table.clearSelection();
 				table.addRowSelectionInterval(i, i);
 			}
-
-			popupMenu.setLocation(MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y);
-			invoker.setLocation(MouseInfo.getPointerInfo().getLocation().x, MouseInfo.getPointerInfo().getLocation().y);
-			showPopup(true);
+			popupMenu.showPopup();
 		}
 	}//GEN-LAST:event_tableMouseClicked
 
 	private void readTagsMenuCheckboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_readTagsMenuCheckboxItemStateChanged
-		readTagsStateChanged(evt);
+		new Actions(this).readTagsStateChanged(evt);
 	}//GEN-LAST:event_readTagsMenuCheckboxItemStateChanged
 
 	private void startScanMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startScanMenuItemActionPerformed
-		startScanActionPerformed(evt);
+		new Actions(this).startScanActionPerformed(evt);
 	}//GEN-LAST:event_startScanMenuItemActionPerformed
 
 	private void startCrcMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_startCrcMenuItemActionPerformed
-		startCrcActionPerformed(evt);
+		new Actions(this).startCrcActionPerformed(evt);
 	}//GEN-LAST:event_startCrcMenuItemActionPerformed
 
 	private void changePathMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changePathMenuItemActionPerformed
-		changePathActionPerformed(evt);
+		new Actions(this).changePathActionPerformed(evt);
 	}//GEN-LAST:event_changePathMenuItemActionPerformed
 
 	private void exportTxtMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportTxtMenuItemActionPerformed
-		exportTxtActionPerformed(evt);
+		new Actions(this).exportTxtActionPerformed(evt);
 	}//GEN-LAST:event_exportTxtMenuItemActionPerformed
 
 	private void clearListMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clearListMenuItemActionPerformed
-		clearListActionPerformed(evt);
+		new Actions(this).clearListActionPerformed(evt);
 	}//GEN-LAST:event_clearListMenuItemActionPerformed
 
 	private void selectAllMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllMenuItemActionPerformed
-		selectAllActionPerformed(evt);
+		new Actions(this).selectAllActionPerformed(evt);
 	}//GEN-LAST:event_selectAllMenuItemActionPerformed
 
 	private void aboutMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aboutMenuItemActionPerformed
-		aboutMenuPerformed(evt);
+		new Actions(this).aboutMenuPerformed(evt);
 	}//GEN-LAST:event_aboutMenuItemActionPerformed
 
 	private void saveMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveMenuItem1ActionPerformed
-		saveActionPerformed(evt);
+		new Actions(this).saveActionPerformed(evt);
 	}//GEN-LAST:event_saveMenuItem1ActionPerformed
 
 	private void loadMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loadMenuItemActionPerformed
-		loadActionPerformed(evt);
+		new Actions(this).loadActionPerformed(evt);
 	}//GEN-LAST:event_loadMenuItemActionPerformed
 
 	private void exitMenuItemActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exitMenuItemActionPerformed
@@ -667,7 +667,9 @@ public final class ReleaseLister extends javax.swing.JFrame {
 		java.awt.EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
-				releaseLister = ReleaseLister.getInstance();
+				ReleaseLister releaseLister = new ReleaseLister();
+				PopUpMenu popupMenu = new PopUpMenu(releaseLister);
+				releaseLister.setPopupMenu(popupMenu);
 			}
 		});
 
@@ -867,565 +869,10 @@ public final class ReleaseLister extends javax.swing.JFrame {
 	public InterruptableRunnable getInterruptableRunnable() {
 		return interruptableRunnable;
 	}
-
-	/*
-	 * ---------------------------------------
-	 * ---------------Actions-----------------
-	 * ---------------------------------------
-	 */
-	public void copyReleaseNameActionPerformed(java.awt.event.ActionEvent evt) {
-
-		String toClipboard = "";
-		for (int i : table.getSelectedRows()) {
-			toClipboard = toClipboard.concat((String) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_RELEASENAME)) + "\n";
-		}
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(toClipboard), null);
+	
+	public void setInterruptableTunnable(InterruptableRunnable process){
+		this.interruptableRunnable = process;
 	}
 
-	public void copyPathNameActionPerformed(java.awt.event.ActionEvent evt) {
 
-		String toClipboard = "";
-		for (int i : table.getSelectedRows()) {
-			toClipboard = toClipboard.concat((String) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_PATH)) + "\n";
-		}
-		Toolkit.getDefaultToolkit().getSystemClipboard().setContents(new StringSelection(toClipboard), null);
-	}
-
-	public void moveToActionPerformed(java.awt.event.ActionEvent evt) {
-
-		final JFileChooser jfc = new LocatedFileChoser();
-
-		jfc.setFileSelectionMode(JFileChooser.OPEN_DIALOG);
-		jfc.setMultiSelectionEnabled(false);
-		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		int returnVal = jfc.showSaveDialog(jfc);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File moveDest = jfc.getSelectedFile();
-			for (int i : table.getSelectedRows()) {
-				try {
-					Release toMove = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
-					FileUtils.moveDirectoryToDirectory(toMove.getRelease(), moveDest, true);
-					ReleaseHolder.getInstance().getReleaseList().remove(toMove);
-				} catch (IOException ex) {
-					Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-				}
-
-			}
-
-			updateTable();
-		}
-
-	}
-
-	public void copyToActionPerformed(java.awt.event.ActionEvent evt) {
-
-		final JFileChooser jfc = new LocatedFileChoser();
-		jfc.setLocation(MouseInfo.getPointerInfo().getLocation());
-		jfc.setFileSelectionMode(JFileChooser.OPEN_DIALOG);
-		jfc.setMultiSelectionEnabled(false);
-		jfc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-
-		int returnVal = jfc.showSaveDialog(jfc);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			File moveDest = jfc.getSelectedFile();
-			for (int i : table.getSelectedRows()) {
-				try {
-					Release toCopy = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_OBJECT);
-					FileUtils.copyDirectoryToDirectory(toCopy.getRelease(), moveDest);
-				} catch (IOException ex) {
-					Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-
-	}
-
-	public void removeItemsFromTableActionPerformed(java.awt.event.ActionEvent evt) {
-		int[] marked = table.getSelectedRows();
-		Arrays.sort(marked);
-		for (int i = marked.length - 1; i >= 0; i--) {
-			tableModel.removeRow(table.convertRowIndexToModel(marked[i]));
-		}
-	}
-
-	public void deleteReleasesActionPerformed(java.awt.event.ActionEvent evt) {
-		int value = JOptionPane.showConfirmDialog(null, "Do you really want to delete the marked releases from hard disk?", "Confirm delete", JOptionPane.OK_CANCEL_OPTION);
-		if (value == JOptionPane.OK_OPTION) {
-			int[] marked = table.getSelectedRows();
-			Arrays.sort(marked);
-			for (int i = marked.length - 1; i >= 0; i--) {
-				Release r = (Release) tableModel.getValueAt(table.convertRowIndexToModel(marked[i]), releaseLister.COL_OBJECT);
-				try {
-					FileUtils.deleteDirectory(r.getRelease());
-					ReleaseHolder.getInstance().getReleaseList().remove(r);
-				} catch (IOException ex) {
-					Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-				}
-
-			}
-			updateTable();
-		}
-
-	}
-
-	protected void readTagsStateChanged(java.awt.event.ItemEvent evt) {        
-		if (evt.getStateChange() == ItemEvent.SELECTED) {
-			setReadTagOption(true);
-		} else {
-			setReadTagOption(false);
-		}
-	}    
-
-	protected void startScanActionPerformed(java.awt.event.ActionEvent evt) {        
-		if (table.getRowCount() != 0) {
-			int value = JOptionPane.showConfirmDialog(null, "This will clear "
-					+ "the whole list and rescan the collection. Are you sure?",
-					"Really?", JOptionPane.YES_NO_OPTION);
-			if (value != JOptionPane.YES_OPTION) {
-				return;
-			}
-		}
-
-		interruptableRunnable = new Scanner(readTagOption);
-		new Thread(interruptableRunnable).start();
-
-	}    
-
-	protected void startCrcActionPerformed(java.awt.event.ActionEvent evt) {
-		ReleaseLister.getInstance().setEnabled(false);
-		List<Release> toCheck = new LinkedList<>();
-		boolean showConfirm = false;
-		for (int i : table.getSelectedRows()) {
-			if (!tableModel.getValueAt(table.convertRowIndexToModel(i), releaseLister.COL_CRC_OK).equals("")) {
-				showConfirm = true;
-				break;
-			}
-		}
-
-		if (showConfirm) {
-			Object[] options = {"Check all", "Check unverified", "Cancel"};
-
-			int value = JOptionPane.showOptionDialog(null,
-					"Some of the marked releases have already been checked. Do you want to verify them again "
-							+ "or only the unverified ones?",
-							"trouble in china town",
-							JOptionPane.DEFAULT_OPTION,
-							JOptionPane.INFORMATION_MESSAGE,
-							null,
-							options,
-							options[1]);
-			if (value == 0) {
-				for (int r : table.getSelectedRows()) {
-					toCheck.add((Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
-				}
-				interruptableRunnable = new CRCChecker(toCheck);
-				new Thread(interruptableRunnable).start();
-
-			} else if (value == 1) {
-				for (int r : table.getSelectedRows()) {
-					Release m = (Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT);
-					if (!m.isCrcChecked()) {
-						toCheck.add(m);
-					}
-				}
-				if (toCheck.isEmpty()) {
-					return;
-				}
-				interruptableRunnable = new CRCChecker(toCheck);
-				new Thread(interruptableRunnable).start();
-
-			} else {
-				ReleaseLister.getInstance().setEnabled(true);
-			}
-
-		} else {
-			for (int r : table.getSelectedRows()) {
-				toCheck.add((Release) tableModel.getValueAt(table.convertRowIndexToModel(r), releaseLister.COL_OBJECT));
-			}
-			interruptableRunnable = new CRCChecker(toCheck);
-			new Thread(interruptableRunnable).start();
-		}
-	}
-
-	protected void changePathActionPerformed(java.awt.event.ActionEvent evt) {        
-		new PathEditor().setVisible(true);
-	}    
-
-	protected void saveActionPerformed(java.awt.event.ActionEvent evt) {
-		final JFileChooser jfc = new LocatedFileChoser();
-		jfc.setFileSelectionMode(JFileChooser.SAVE_DIALOG);
-		jfc.setMultiSelectionEnabled(false);
-		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				if (f.getName().endsWith(".rlist")) {
-					return true;
-				}
-				return false;
-			}
-
-			@Override
-			public String getDescription() {
-				return ".rlist";
-			}
-		});
-		int returnVal = jfc.showSaveDialog(jfc);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			String saveFile = jfc.getSelectedFile().getAbsolutePath();
-			if (!saveFile.endsWith(".rlsit")) {
-				saveFile = saveFile.concat(".rlist");
-			}
-			new Serializer().serialize(saveFile);
-		}
-	}
-
-	protected void loadActionPerformed(java.awt.event.ActionEvent evt) {
-		final JFileChooser jfc = new LocatedFileChoser();
-		jfc.setFileSelectionMode(JFileChooser.OPEN_DIALOG);
-		jfc.setMultiSelectionEnabled(false);
-		jfc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-		jfc.setFileFilter(new javax.swing.filechooser.FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				if (f.getName().endsWith(".rlist")) {
-					return true;
-				}
-				return false;
-			}
-
-			@Override
-			public String getDescription() {
-				return ".rlist";
-			}
-		});
-		int returnVal = jfc.showSaveDialog(jfc);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			String file = jfc.getSelectedFile().getAbsolutePath();
-
-			new Serializer().deserialize(file);
-		}
-		updateTable();
-
-	}
-
-	protected void exportTxtActionPerformed(java.awt.event.ActionEvent evt) {        
-
-		actionInProgress = true;
-
-		isActive();
-		JFileChooser jfc = new LocatedFileChoser();
-		jfc.setDialogType(JFileChooser.SAVE_DIALOG);
-		jfc.setDialogTitle("Speichern unter...");
-		jfc.setSelectedFile(new File("ReleaseLister Export "
-				+ System.getProperty("user.name") + ".txt"));
-		int returnVal = jfc.showSaveDialog(jfc);
-
-		if (returnVal == JFileChooser.APPROVE_OPTION) {
-			FileWriter fstream = null;
-			try {
-				fstream = new FileWriter(jfc.getSelectedFile());
-			} catch (IOException ex) {
-				Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-
-				actionInProgress = false;
-			}
-
-			if (fstream == null) {
-				JDialog errorDialog = new JDialog();
-				errorDialog.add(new JTextField("Error while saving"));
-
-				actionInProgress = false;
-				return;
-			}
-
-			BufferedWriter out = new BufferedWriter(fstream);
-
-			for (int i = 0; i < tableModel.getRowCount(); i++) {
-				try {
-					out.write((String) tableModel.getValueAt(table.convertRowIndexToModel(i), COL_RELEASENAME));
-					out.newLine();
-				} catch (IOException ex) {
-					Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-
-					actionInProgress = false;
-				}
-			}
-
-			try {
-				out.close();
-				fstream.close();
-			} catch (IOException ex) {
-				Logger.getLogger(ReleaseLister.class.getName()).log(Level.SEVERE, null, ex);
-
-				actionInProgress = false;
-			}
-
-		}
-
-		actionInProgress = false;
-	}    
-
-	protected void clearListActionPerformed(java.awt.event.ActionEvent evt) {        
-		tableModel.fireTableDataChanged();
-		ReleaseHolder.getInstance().getReleaseList().clear();
-		updateTable();
-		setStatusLabel("Status: Idle");
-	}    
-
-	protected void selectAllActionPerformed(java.awt.event.ActionEvent evt) {        
-		table.selectAll();
-	}    
-
-	protected void aboutMenuPerformed(java.awt.event.ActionEvent evt) {        
-		JOptionPane.showMessageDialog(null, "ReleaseLister " + getVersion() + " by vibee", "About", JOptionPane.NO_OPTION);
-	}    
-
-	protected void openBrowserActionPerformed(ActionEvent evt) {
-
-		if (table.getSelectedRows().length > 1) {
-			String confirmDialog = "You are going to open "
-					+ table.getSelectedRows().length + " Browser windows.";
-			int value = JOptionPane.showConfirmDialog(null, confirmDialog, "Really?", JOptionPane.OK_CANCEL_OPTION);
-			if (value == JOptionPane.CANCEL_OPTION || value == JOptionPane.CLOSED_OPTION) {
-				return;
-			}
-
-		}
-
-		for (int i : table.getSelectedRows()) {
-			Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
-					COL_OBJECT);
-			if (Desktop.isDesktopSupported()) {
-				try {
-					Desktop.getDesktop().open(f.getRelease());
-				} catch (IOException ex) {
-					Logger.getLogger(getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-	}
-
-	protected void openNFOActionPerformed(ActionEvent evt) {
-
-		if (table.getSelectedRows().length > 1) {
-			String confirmDialog = "You are going to open "
-					+ table.getSelectedRows().length + " NFO files.";
-			int value = JOptionPane.showConfirmDialog(null, confirmDialog, "Really?", JOptionPane.OK_CANCEL_OPTION);
-			if (value == JOptionPane.CANCEL_OPTION || value == JOptionPane.CLOSED_OPTION) {
-				return;
-			}
-
-		}
-
-		for (int i : table.getSelectedRows()) {
-			Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
-					COL_OBJECT);
-
-			if (Desktop.isDesktopSupported()) {
-				try {
-					Desktop.getDesktop().open(f.getNfo());
-				} catch (IOException ex) {
-					Logger.getLogger(getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-	}
-
-	protected void playActionPerformed(ActionEvent evt) {
-
-		for (int i : table.getSelectedRows()) {
-			Release f = (Release) tableModel.getValueAt(table.convertRowIndexToModel(i),
-					COL_OBJECT);
-
-			if (Desktop.isDesktopSupported()) {
-				try {
-					File[] toPlay;
-					if ((toPlay = f.getRelease().listFiles(new FileFilter() {
-						@Override
-						public boolean accept(File pathname) {
-							if (pathname.getName().endsWith(".m3u")) {
-								return true;
-							} else {
-								return false;
-							}
-						}
-					})).length > 0) {
-						for (File playlist : toPlay) {
-							Desktop.getDesktop().open(playlist);
-						}
-					} else {
-
-						for (AudioFileWithChecksum mp3 : f.getAudioFiles()) {
-							Desktop.getDesktop().open(mp3.getAudioFile());
-						}
-
-					}
-
-				} catch (IOException ex) {
-					Logger.getLogger(getName()).log(Level.SEVERE, null, ex);
-				}
-			}
-		}
-	}
-
-	/*
-	 * ---------------------------------------
-	 * --------------Popup Menu---------------
-	 * ---------------------------------------
-	 */
-	protected JMenuItem openBrowserPopupItem = new JMenuItem("Open in Browser");
-	protected JMenuItem openNFOPopupItem = new JMenuItem("Open NFO");
-	protected JMenuItem playPopupItem = new JMenuItem("Play");
-	protected JMenuItem copyNamePopupItem = new JMenuItem("Copy Release Name(s)");
-	protected JMenuItem copyPathPopupItem = new JMenuItem("Copy Path(s)");
-	protected JMenuItem moveToPopupItem = new JMenuItem("Move Release(s) to...");
-	protected JMenuItem copyToPopupItem = new JMenuItem("Copy Release(s) to...");
-	protected JMenuItem removePopupItem = new JMenuItem("Remove from List");
-	protected JMenuItem deletePopupItem = new JMenuItem("Delete Release(s)");
-	JMenuItem[] popupMenuItems = {
-			openBrowserPopupItem, openNFOPopupItem, playPopupItem,
-			copyNamePopupItem, copyPathPopupItem, /*removePopupItem, */moveToPopupItem,
-			copyToPopupItem, deletePopupItem
-	};
-	JPopupMenu popupMenu = new JPopupMenu();
-	JDialog invoker = new JDialog();
-
-	private void instantiatePopupMenu() {
-
-		for (JMenuItem c : popupMenuItems) {
-			popupMenu.add(c);
-		}
-
-		invoker.setUndecorated(true);
-		invoker.setVisible(false);
-		popupMenu.setVisible(false);
-		invoker.add(popupMenu);
-		invoker.pack();
-
-		guiComponents.addOpenNFOComponents(openNFOPopupItem);
-
-		openBrowserPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				openBrowserActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		openNFOPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				openNFOActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		playPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				playActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-
-		copyNamePopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				copyReleaseNameActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		copyPathPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				copyPathNameActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		moveToPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				moveToActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		copyToPopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				copyToActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		removePopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				removeItemsFromTableActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		deletePopupItem.addActionListener(new java.awt.event.ActionListener() {
-			@Override
-			public void actionPerformed(java.awt.event.ActionEvent evt) {
-				deleteReleasesActionPerformed(evt);
-				showPopup(false);
-			}
-		});
-
-		for (final JMenuItem c : popupMenuItems) {
-			c.addMouseListener(new java.awt.event.MouseAdapter() {
-				@Override
-				public void mouseEntered(java.awt.event.MouseEvent evt) {
-					c.setOpaque(true);
-					c.setBackground(Color.LIGHT_GRAY);
-				}
-
-				@Override
-				public void mouseExited(java.awt.event.MouseEvent evt) {
-					uncolorPopupItems(c);
-				}
-			});
-		}
-
-		invoker.addFocusListener(new FocusListener() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				invoker.setVisible(false);
-				popupMenu.setVisible(false);
-			}
-
-			@Override
-			public void focusGained(FocusEvent e) {
-				invoker.setVisible(true);
-				popupMenu.setVisible(true);
-			}
-		});
-
-	}
-
-	protected void showPopup(boolean status) {
-		if (status == false) {
-			for (JMenuItem j : popupMenuItems) {
-				uncolorPopupItems(j);
-			}
-		}
-		popupMenu.setVisible(status);
-		invoker.setVisible(status);
-	}
-
-	private void uncolorPopupItems(JMenuItem j) {
-		j.setOpaque(false);
-		j.setBackground(Color.green); //totally idiotic but it works
-	}
 }

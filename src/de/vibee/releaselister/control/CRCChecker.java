@@ -45,8 +45,10 @@ public class CRCChecker extends InterruptableRunnable{
     long time = 0;
     long timeGone = 0;
     long size = 0;
+    ReleaseLister mainWindow;
     
-    public CRCChecker(List<Release> toCheck){
+    public CRCChecker(List<Release> toCheck, ReleaseLister mainWindow){
+    	this.mainWindow = mainWindow;
         this.toCheck = toCheck;
     }
     
@@ -92,7 +94,7 @@ public class CRCChecker extends InterruptableRunnable{
     @Override
     public void run() {
         
-        actionFrame = new ActionFrame();
+        actionFrame = new ActionFrame(mainWindow);
         actionFrame.setTitle("Verifying Releases...");
         actionFrame.getProgressBar().setIndeterminate(false);
         actionFrame.getProgressBar().setMinimum(0);
@@ -105,7 +107,7 @@ public class CRCChecker extends InterruptableRunnable{
             timeGone = System.currentTimeMillis() - time;
             actionFrame.setStatusLabelText("Veryfied " + counter + " of " + 
                     toCheck.size() + " Releases (" + (long)(size / timeGone) / 1024 + " MB/s)");
-            if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
+            if (this.isInterrupted()){
                 actionFrame.setStatusLabelText("Verify aborted.");
                 actionFrame.setOkButtonEnabled(true);
                 return;

@@ -14,11 +14,14 @@ import javax.swing.JProgressBar;
  * @author vibee
  */
 public class ActionFrame extends javax.swing.JFrame {
+	
+	private ReleaseLister mainWindow;
 
     /**
      * Creates new form ActionFrame
      */
-    public ActionFrame() {
+    public ActionFrame(ReleaseLister mainWindow) {
+    	this.mainWindow = mainWindow;
         initComponents();
         this.abortButton.setEnabled(true);
         this.okButton.setEnabled(false);
@@ -33,16 +36,16 @@ public class ActionFrame extends javax.swing.JFrame {
 
         @Override
         public void windowOpened(WindowEvent e) {
-            ReleaseLister.getInstance().setEnabled(false);
+        	mainWindow.setEnabled(false);
         }
 
         @Override
         public void windowClosing(WindowEvent e) {
-            if (ReleaseLister.getInstance().getInterruptableRunnable() != null){
-                ReleaseLister.getInstance().getInterruptableRunnable().setInterrupted(true);
+            if (mainWindow.getInterruptableRunnable() != null){
+            	mainWindow.getInterruptableRunnable().setInterrupted(true);
             }
             
-            ReleaseLister.getInstance().setEnabled(true);
+            mainWindow.setEnabled(true);
         }
 
         @Override
@@ -160,15 +163,15 @@ public class ActionFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void abortButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_abortButtonActionPerformed
-        if (ReleaseLister.getInstance().getInterruptableRunnable() != null){
-            ReleaseLister.getInstance().getInterruptableRunnable().setInterrupted(true);
+        if (mainWindow.getInterruptableRunnable() != null){
+        	mainWindow.getInterruptableRunnable().setInterrupted(true);
         }
         abortButton.setEnabled(false);
     }//GEN-LAST:event_abortButtonActionPerformed
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
-        if (!ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
-            ReleaseLister.getInstance().updateTable();
+        if (!mainWindow.getInterruptableRunnable().isInterrupted()){
+        	mainWindow.updateTable();
         }
         WindowEvent wev = new WindowEvent(this, WindowEvent.WINDOW_CLOSING);
         Toolkit.getDefaultToolkit().getSystemEventQueue().postEvent(wev);

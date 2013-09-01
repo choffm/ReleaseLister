@@ -44,24 +44,26 @@ public class PathEditor extends javax.swing.JFrame {
     private static PathEditor pathEditor;
     private Set<ReleasePath> paths;
     private DefaultTableModel model;
+    private ReleaseLister mainWindow;
     
-    public PathEditor() {
+    public PathEditor(ReleaseLister mainWindow) {
         initComponents();
         model = (DefaultTableModel) pathTable.getModel();
         updatePathTable();
         this.addWindowListener(w);
+        this.mainWindow = mainWindow;
     }
     
     WindowListener w = new WindowListener() {
 
         @Override
         public void windowOpened(WindowEvent e) {
-            ReleaseLister.getInstance().setEnabled(false);
+            mainWindow.setEnabled(false);
         }
 
         @Override
         public void windowClosing(WindowEvent e) {
-            ReleaseLister.getInstance().setEnabled(true);
+        	mainWindow.setEnabled(true);
         }
 
         @Override

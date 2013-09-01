@@ -49,10 +49,12 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     private boolean readTagOption;
     private Set<Release> scannedList;
     private ActionFrame actionFrame;
+    ReleaseLister mainWindow;
     
-    public Scanner(boolean readTagOption){
+    public Scanner(boolean readTagOption, ReleaseLister mainWindow){
         this.readTagOption = readTagOption;
         scannedList = new HashSet<>();
+        this.mainWindow = mainWindow;
     }
 
     /**
@@ -67,7 +69,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
             
             for (File f : root.listFiles()){
                 
-                if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
+                if (this.isInterrupted()){
                     return;
                 }
                 
@@ -118,13 +120,13 @@ public class Scanner extends InterruptableRunnable implements Runnable {
         }
         
         else{
-            ReleaseLister.getInstance().setStatusLabel("Path not found");
+//            ReleaseLister.getInstance().setStatusLabel("Path not found");
         }
         
         if (!dirs.isEmpty()){
             
             for (File f : dirs){
-                if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
+                if (this.isInterrupted()){
                     return;
                 }
                 scanForReleases(f);
@@ -144,7 +146,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
     @Override
     public void run() {
         resetCounter();
-        actionFrame = new ActionFrame();
+        actionFrame = new ActionFrame(mainWindow);
         actionFrame.getProgressBar().setIndeterminate(true);
         actionFrame.getProgressBar().setMinimum(0);
         actionFrame.getProgressBar().setMaximum(1);
@@ -157,7 +159,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
         
         for (ReleasePath aktPath : PathHolder.getInstance().getPathList()) {
             try{
-                if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
+                if (this.isInterrupted()){
                     break;
                 }
                 if(aktPath.isScanned()){
@@ -189,7 +191,7 @@ public class Scanner extends InterruptableRunnable implements Runnable {
         
         actionFrame.getProgressBar().setIndeterminate(false);
         
-        if (ReleaseLister.getInstance().getInterruptableRunnable().isInterrupted()){
+        if (this.isInterrupted()){
             actionFrame.setStatusLabelText("Search aborted.");
             actionFrame.setOkButtonEnabled(true);
             actionFrame.getProgressBar().setValue(0);

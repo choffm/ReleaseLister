@@ -27,9 +27,9 @@ import javax.swing.JFileChooser;
  *
  * @author vibee
  */
-class LocatedFileChoser extends JFileChooser {
+public class LocatedFileChoser extends JFileChooser {
     @Override
-    protected JDialog createDialog(Component parent) throws HeadlessException {
+    public JDialog createDialog(Component parent) throws HeadlessException {
         JDialog dlg = super.createDialog(parent);
         dlg.setLocation(MouseInfo.getPointerInfo().getLocation());
         return dlg;
