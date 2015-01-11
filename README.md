@@ -8,8 +8,6 @@ of GB of releases and quite quickly perform search and SFV verify.
 It is written in java and platform independent as such, licensed under The GNU General Public 
 Lincense v3.0 (GPL).
 
-Binaries can be downloaded at http://vibee.de.
-
 
 Dependencies
 ============
