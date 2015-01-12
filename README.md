@@ -34,9 +34,3 @@ paths
 - Autosave and restore database on quit/startup
 
 
-Upcoming Features
-===========
-
-- Provide a command line interface
-- Improve UI experience
-- Include SQLite support
