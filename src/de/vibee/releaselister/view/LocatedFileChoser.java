@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 vibee
+ * Copyright (C) 2012 Clemens clemens@vibee.de
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import javax.swing.JFileChooser;
 
 /**
  *
- * @author vibee
+ * @author Clemens
  */
 public class LocatedFileChoser extends JFileChooser {
     @Override

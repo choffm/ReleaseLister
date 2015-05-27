@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 vibee clemens@v.de1.cc
+ * Copyright (C) 2012 Clemens clemens@vibee.de
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ import org.jaudiotagger.tag.TagException;
  * all mp3s included in this release, the bitrate and VBR status. Optional genre,
  * if tags have been read (is null else). readTag flag is set by the instantiater,
  * if readTag == true, genre will be read.
- * @author vibee
+ * @author Clemens
  */
 public class Release implements Serializable{
 

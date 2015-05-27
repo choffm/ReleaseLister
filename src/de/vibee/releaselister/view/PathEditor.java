@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 vibee clemens@v.de1.cc
+ * Copyright (C) 2012 Clemens clemens@vibee.de
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ import de.vibee.releaselister.model.ReleasePath;
 
 /**
  *
- * @author vibee
+ * @author Clemens
  */
 public class PathEditor extends javax.swing.JFrame {
 

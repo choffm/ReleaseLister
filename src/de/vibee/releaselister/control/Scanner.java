@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2012 vibee clemens@v.de1.cc
+ * Copyright (C) 2012 Clemens clemens@vibee.de
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ import de.vibee.releaselister.view.ReleaseLister;
  * Scanner is searching for MP3 Releases which comply with certain rules.
  * Only those MP3 Releases are being added, which match scene rules for naming
  * and contain at least an sfv file (nfo optional).
- * @author vibee
+ * @author Clemens
  */
 public class Scanner extends InterruptableRunnable implements Runnable {
     
